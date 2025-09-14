@@ -82,9 +82,6 @@ def test_get_neighbors():
     assert neighbors[5] == Agent("0")
     assert neighbors[6] == Agent("X")
     assert neighbors[7] == Agent("0")
-
-    # for neighbor in neighbors:
-    #     print("Neighbor", neighbor)
     
 def test_move_agent():
     grid = [
@@ -109,10 +106,5 @@ def test_move_agent():
 def test_simulate():
     city = City(4, 4, 2)
     city.simulate()
-
-test_move_agent()
-test_get_neighbors()
-test_setup()
-test_simulate()
 
     

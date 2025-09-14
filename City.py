@@ -133,8 +133,11 @@ class City():
         potential_new_location_satisfaction_actual = [neighbor.satisfaction_perc(self.get_neighbors(neighbor.x, neighbor.y)) for neighbor in non_none_neighbors_potential]
         
         # Calculate satisfaction ratios
-        current_satisfaction = sum(current_neighborhood_satisfaction_target) / sum(current_neighborhood_satisfaction_actual) if len(current_neighborhood_satisfaction_actual) > 0 else 0
-        potential_satisfaction = sum(potential_new_location_satisfaction_target) / sum(potential_new_location_satisfaction_actual) if len(potential_new_location_satisfaction_actual) > 0 else 0
+        current_actual_sum = sum(current_neighborhood_satisfaction_actual)
+        potential_actual_sum = sum(potential_new_location_satisfaction_actual)
+        
+        current_satisfaction = sum(current_neighborhood_satisfaction_target) / current_actual_sum if len(current_neighborhood_satisfaction_actual) > 0 and current_actual_sum > 0 else 0
+        potential_satisfaction = sum(potential_new_location_satisfaction_target) / potential_actual_sum if len(potential_new_location_satisfaction_actual) > 0 and potential_actual_sum > 0 else 0
         
         return potential_satisfaction > current_satisfaction
 
