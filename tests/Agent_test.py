@@ -1,19 +1,19 @@
 import sys
 sys.path.append('..')
-from Agent_og import Agent
+from agent import ParentAgent
 
 def test_compare():
-    agent1 = Agent("A")
-    agent2 = Agent("A")
-    agent3 = Agent("B")
+    agent1 = ParentAgent("A")
+    agent2 = ParentAgent("A")
+    agent3 = ParentAgent("B")
 
     assert agent1.compare(agent2) == True
     assert agent1.compare(agent3) == False
 
 def test_is_satisfied():
-    evaluation_agent = Agent("A", 0.5)
-    adjacent_agent_1 = Agent("A")
-    adjacent_agent_2 = Agent("B")   
+    evaluation_agent = ParentAgent("A", 0.5)
+    adjacent_agent_1 = ParentAgent("A")
+    adjacent_agent_2 = ParentAgent("B")   
 
     assert evaluation_agent.is_satisfied([adjacent_agent_1]) == True
     assert evaluation_agent.is_satisfied([adjacent_agent_1, adjacent_agent_2]) == True
