@@ -1,8 +1,8 @@
 import sys
 import logging
 sys.path.append('..')
-from City import City
-from Agent import Agent
+from City_og import City
+from Agent_og import Agent
 from Logger import Logger
 Logger()
 

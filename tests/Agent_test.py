@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
-from Agent import Agent
+from Agent_og import Agent
 
 def test_compare():
     agent1 = Agent("A")
