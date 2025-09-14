@@ -71,7 +71,10 @@ class Agent():
             else:
                 other_group_count += 1
         
-        return (same_group_count/(same_group_count+other_group_count)) / self.threshold
+        total_neighbors = same_group_count + other_group_count
+        if total_neighbors == 0:
+            return 1.0  # If no neighbors, agent is satisfied by default
+        return (same_group_count / total_neighbors) / self.threshold
 
     def is_satisfied(self, agent_list: List[Union['Agent', None]]) -> bool:
         """
