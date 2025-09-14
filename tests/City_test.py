@@ -105,6 +105,9 @@ def test_move_agent():
 
 def test_simulate():
     city = City(4, 4, 2)
+    city.setUp()
     city.simulate()
+
+# test_simulate()
 
     
