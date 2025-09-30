@@ -2,18 +2,20 @@ import random
 import logging
 # This is imported because this python version doesn't support OR operators for function parameter typing.
 from typing import Union, List
-from Agent_og import Agent
+from agent import ParentAgent
+from diverse import DiverseAgent
+from conform import ConformingAgent
 from Logger import Logger
 
 Logger()
 
 class City():
     # The contructor allows for a grid to be passed in for testing purposes.
-    def __init__(self, width: int, height: int, rounds: int, grid_override: List[List[Union['Agent', None]]] = []):
+    def __init__(self, width: int, height: int, rounds: int, grid_override: List[List[Union['ParentAgent', None]]] = None):
         self.width = width
         self.height = height
         self.rounds = rounds
-        self.grid = grid_override
+        self.grid = grid_override if grid_override is not None else []
         self.logger = logging.getLogger("shelling-model-logger") 
 
     def __str__(self):
@@ -32,11 +34,17 @@ class City():
         return grid_string
 
     def _grid_iterator(self):
+        """
+        Convenience function for walking the city grid
+        """
         for rowIndex in range(self.height): 
             for columnIndex in range(self.width): 
                 yield rowIndex, columnIndex, self.grid[rowIndex][columnIndex]
 
     def _empty_locations(self):
+        """
+        Convenience function for finding all emptyl lots in the city
+        """
         for _x, _y, _agent in self._grid_iterator():
             if(_agent is None):
                 yield _x, _y
@@ -49,12 +57,16 @@ class City():
             """
             Weighted random selection of X, O, or None
             """
-            agentIdentification = random.choices(choices, weights=weights, k=population)[0]
+            agentIdentification = random.choices(choices, weights=weights, k=1)[0]
 
             if agentIdentification == "_":
                 return None
             
-            return Agent(agentIdentification)
+            if agentIdentification == "X":
+                return DiverseAgent(agentIdentification)
+            
+            if agentIdentification == "O":
+                return ConformingAgent(agentIdentification)
 
         if(len(self.grid) > 0):
             return ## Do not recreate the list if it's already set up. This is to support testing by allowing a grid to be passed into the constructor.
@@ -71,19 +83,22 @@ class City():
         self.logger.info(f"Grid groups: {choices}")
         self.logger.info(f"Grid randomization weights: {weights}")
 
-    def get_neighbors(self, x: int, y: int) -> List[Union['Agent', None]]:
+    def get_neighbors(self, x: int, y: int) -> List[Union['ParentAgent', None]]:
+        # set the bounds of the neighborhood for this centroid
         min_y = max(0, y-1)
         max_y = min(self.height-1, y+1)
         min_x= max(0, x-1)
         max_x = min(self.width-1, x+1)
         neighbors = []
+
+        #Walk the neighborhood and identify neighbors
         for _y in range(min_y, max_y + 1):  
             for _x in range(min_x, max_x + 1):  
                 
                 if(_x == x and _y == y):
                     continue
                 neighbors.append(self.grid[_y][_x])
-                self.logger.info(f"({x}, {y}) has a neighbor at ({_x}, {_y}): {self.grid[_y][_x]}")
+                self.logger.debug(f"({x}, {y}) has a neighbor at ({_x}, {_y}): {self.grid[_y][_x]}")
 
         return neighbors
 
@@ -102,7 +117,7 @@ class City():
         self.grid[new_location_target[0]][new_location_target[1]] = agent
         self.grid[x][y] = None
 
-        self.logger.info(f"Agent moved from ({x}, {y}) to ({new_location_target[0]}, {new_location_target[1]})")
+        # self.logger.info(f"Agent moved from ({x}, {y}) to ({new_location_target[0]}, {new_location_target[1]})")
         
     # This was added to support the expansion of the assignment which 
     # requires the calculation of the satisfaction percentage of an entire neighborhood.
@@ -119,7 +134,10 @@ class City():
         if(simulation_candidate_x == -1 and simulation_candidate_y == -1):
             if len(current_neighborhood_satisfaction_actual) == 0:
                 return 0
-            return sum(current_neighborhood_satisfaction_target) / sum(current_neighborhood_satisfaction_actual)
+            current_actual_sum = sum(current_neighborhood_satisfaction_actual)
+            if current_actual_sum == 0:
+                return 0
+            return sum(current_neighborhood_satisfaction_target) / current_actual_sum
 
         # Simulate the neighbor in the new neighborhood
         neighbors_with_candidate = neighbors_of_evaluation_location.copy()
@@ -142,8 +160,10 @@ class City():
         return potential_satisfaction > current_satisfaction
 
     def simulate(self):
+        self.logger.info(f"Running simulation for {self.rounds} rounds")
         for simulation_round in range(self.rounds):
             self.logger.info(f"Simulation round {simulation_round}")
+            moved_agents = 0
             for _x, _y, _agent in self._grid_iterator():
                 if(_agent is None):
                     continue
@@ -154,5 +174,8 @@ class City():
                     
                     if(potential_new_location_satisfaction > current_neighborhood_satisfaction):
                         self.move_agent(_x, _y)
-                        self.logger.info(f"Grid mutated. New State:")
-                        print(self)
+                        moved_agents += 1
+                        # self.logger.info(f"Grid mutated. New State:")
+                        # print(self) # We can't use the logger here because it doesn't properly format the grid
+            if moved_agents == 0:
+                self.logger.info(f"Simulation round {simulation_round} completed with no mutations")

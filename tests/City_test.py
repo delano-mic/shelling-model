@@ -106,9 +106,9 @@ def test_move_agent():
 
 
 def test_simulate():
-    city = City(5, 5, 10) # Running a 5x5 simulation for 10 rounds per the instructions
+    city = City(5, 5, 5000) # Running a 5x5 simulation for 10 rounds per the instructions
     city.setUp()
     city.simulate()
 
-test_simulate()
+# test_simulate()
     
